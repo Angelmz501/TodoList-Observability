@@ -1,0 +1,23 @@
+---
+- name: Deploy Todo App stack locally
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  tasks:
+    - name: Build and start all containers
+      command:
+        cmd: docker-compose up -d --build
+        chdir: "{{ playbook_dir }}"
+
+    - name: Wait for the Flask app to be up
+      uri:
+        url: http://localhost/
+        status_code: 200
+        timeout: 30
+
+    - name: Confirm Prometheus is scraping
+      uri:
+        url: http://localhost:9090/-/ready
+        status_code: 200
+        timeout: 30

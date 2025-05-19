@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite
+db/
+venv/
+*.log
+
+# Docker
+.env
+
+# Ansible
+.retry
+
+# IDEs
+.vscode/
