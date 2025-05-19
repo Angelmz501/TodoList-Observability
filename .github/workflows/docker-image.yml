@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: CI / CD Pipeline
 
 on:
   push:
@@ -32,11 +32,25 @@ jobs:
         run: |
           pip install flake8
           flake8 .
-
+  
       - name: Build Docker image
         run: |
           docker build -t todo-list-app:${{ github.sha }} .
+  
+  deploy:
+    name: Deploy with Ansible
+    needs: build
+    runs-on: ubuntu-latest
 
-      # Opcional: lanzar tests dentro del contenedor
-      # - name: Test Docker image
-      #   run: docker run --rm todo-list-app:${{ github.sha }} pytest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Docker Compose & Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose ansible
+
+      - name: Run Ansible playbook
+        run: |
+          ansible-playbook -i inventory.ini deploy.yml
