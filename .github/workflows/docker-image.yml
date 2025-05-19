@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
+  workflow_dispatch:    # ← Este trigger es el que añade el botón “Run workflow”
 
 jobs:
   build:
@@ -36,8 +36,3 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t todo-list-app:${{ github.sha }} .
-
-      # (opcional) puedes añadir aquí un paso de tests de tu contenedor
-      # - name: Run container tests
-      #   run: docker run --rm todo-list-app:${{ github.sha }} pytest
-
