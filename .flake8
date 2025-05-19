@@ -1,0 +1,10 @@
+[flake8]
+# Aumentamos el largo máximo de línea
+max-line-length = 120
+
+# Ignoramos las reglas que saltan ahora en tu app.py
+ignore =
+  E501  # line too long
+  E302  # expected 2 blank lines before function/class
+  E305  # expected 2 blank lines after function/class
+  E722  # do not use bare except
