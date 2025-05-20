@@ -1,96 +1,155 @@
-# TO DO LIST - FLASK - DOCKER - Heroku - GITHUB ACTIONS Hands-On
+# Todo List Observability Project
 
-<b>Simple web-project to practice docker and deployment concepts </b>
-- writing docker files
-- building images
-- running container and manage them
-- persisting data 
-- playing around with docker volumes and volume mapping
-- deployment on heroku
-- basic pipeline
-- writing Git-Hub Actions Workflow file
-- Git-Hub Actions to build and push the docker image to the registry on each push/PR
+[![CI / CD Pipeline](https://github.com/Angelmz501/TodoList-Observability/actions/workflows/docker-image.yml/badge.svg)](https://github.com/Angelmz501/TodoList-Observability/actions/workflows/docker-image.yml)
 
+Una aplicación **Todo List** construida en Flask y que integra un completo stack de observabilidad y despliegue automatizado:
 
-## Running 
+- **Instrumentación** con OpenTelemetry (trazas y métricas OTLP).  
+- **Scraping** de métricas con Prometheus.  
+- **Dashboards** y persistencia con Grafana.  
+- **Contenerización** con Docker & Docker Compose.  
+- **Despliegue** automatizado con Ansible.  
+- **CI/CD** con GitHub Actions: lint, build de imagen Docker y despliegue.
 
-### Try it out live on heroku!
-[TO DO LIST](https://todolist-docker.herokuapp.com/)
+---
 
-### USING DOCKER - PULLING FROM DOCKER HUB
+## 📂 Estructura del proyecto
+
+```
+.
+├── .github/                   ← Workflows de GitHub Actions
+│   └── workflows/
+│       └── docker-image.yml   ← CI/CD pipeline
+├── ansible.cfg                ← Configuración Ansible
+├── deploy.yml                 ← Playbook de despliegue local
+├── inventory.ini              ← Inventario (localhost)
+├── Dockerfile                 ← Imagen de tu app Flask
+├── docker-compose.yml         ← Orquestación local (app, OTEL, Prometheus, Grafana)
+├── prometheus.yml             ← Config Prometheus
+├── otel-collector-config.yaml ← Config OpenTelemetry Collector
+├── .flake8                    ← Reglas de style-checking para flake8
+├── requirements.txt           ← Dependencias Python
+├── app.py                     ← Lógica de la aplicación Flask
+├── templates/
+│   └── base.html              ← Plantilla HTML principal
+└── README.md                  ← Este fichero
+```
+
+---
+
+## 🚀 Tecnologías
+
+- **Flask** & **Flask-SQLAlchemy**  
+- **OpenTelemetry** (SDK, exporters OTLP)  
+- **Prometheus** & **Node Exporter**  
+- **Grafana** (con volumen persistente)  
+- **Docker** & **Docker Compose**  
+- **Ansible** (orquestación local)  
+- **GitHub Actions** (CI/CD)  
+- **flake8** (linteo de código Python)
+
+---
+
+## 🛠️ Prerrequisitos
+
+- Docker & Docker Compose (v2+).  
+- Python 3.10+ (para tests y lint local).  
+- Ansible 2.15+ (para despliegue local).  
+- Git & GitHub account.
+
+---
+
+## 🔧 Instalación y ejecución local
+
+1. **Clona este repositorio**  
+   ```bash
+   git clone git@github.com:Angelmz501/TodoList-Observability.git
+   cd TodoList-Observability
+   ```
+
+2. **Instala dependencias Python** (opcional, sólo si quieres lintear o testear localmente)
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate
+   pip install -r requirements.txt
+   pip install flake8
+   flake8 .
+   ```
+
+3. **Arranca todo con Ansible**
+   ```bash
+   ansible-playbook -i inventory.ini deploy.yml
+   ```
+
+   Esto:
+   * Construye y arranca tus contenedores (`docker-compose up -d --build`).
+   * Espera a que Flask y Prometheus estén listos antes de finalizar.
+
+4. **Comprueba los servicios**
+
+   * App Flask → [http://localhost/](http://localhost/)
+   * Prometheus → [http://localhost:9090](http://localhost:9090)
+   * Grafana → [http://localhost:3000](http://localhost:3000)  (credenciales por defecto: **admin/admin**)
+
+---
+
+## 📝 Despliegue manual Docker Compose
+
+Si prefieres hacerlo sin Ansible:
 
 ```bash
-# pull the image from docker hub
-$ docker pull a7medayman6/todolist-flask
-
-# create docker volume for the database to keep your tasks everytime you run ir
-$ docker volume create todolist.db
-
-# run the container
-# map port 5000 in the container to 5001 (or any other free port)
-# map the docker volume you created to /app/db 
-$ docker run -d -p 5001:5000 -v todolist.db:/app/db a7medayman6/todolist-flask
-
-# open the browser, go to http://0.0.0.0:5001 and here is your todo list up and running
+docker compose down
+docker compose up -d --build
 ```
 
-### USING DOCKER - BUILD DOCKER IMAGE
+Y para parar TODO:
 
 ```bash
-# clone the repo into your local host
-$ git clone https://github.com/a7medayman6/Todo-List-Dockerized-Flask-WebApp
-
-$ cd Todo-List-Dockerized-Flask-WebApp
-
-# this will build the docker image from the docker file
-docker build -t todolist-flask:latest .
-
-# check the build was succesfull
-$ docker images | grep todolist-flask
-# the output should be
-# todolist-flask
-
-# create docker volume for the database to keep your tasks everytime you run it
-$ docker volume create todolist.db
-
-# run the container
-# map port 5000 in the container to 5001 (or any other free port)
-# map the docker volume you created to /app/db 
-docker run -d -p 5001:5000 -v todolist.db:/app/db todolist-flask
-
-# open the browser, go to http://0.0.0.0:5001 and here is your todo list up and running
+docker compose down --volumes
 ```
-### BUILDING
 
-```bash
-$ git clone https://github.com/a7medayman6/Todo-List-Dockerized-Flask-WebApp
-$ cd Todo-List-Dockerized-Flask-WebApp
-$ source env/bin/activate
-$ python3 -r requirements.txt
-$ python3 app.py
-```
-## Volume mapping 
-- I was running the app from the docker container on port 5001 and from the local host at port 5000 
-- Mapped the /home/ahmed/todo-flask/db/ directory in the local host to /app/db in the container to have the same data updating in both tabs and to persist the data using this command
-```docker 
-$ docker run -it -p 5001:5000 -v /home/ahmed/todo-flask/db/:/app/db/ todolist-flask
-```
-- created a task in the container tab
-<br>
+---
 
-![Image of the app from container](Screenshots/3.png)
+## 🌐 CI/CD con GitHub Actions
 
-- switched to the local-host tab, and wallah the same task are here, let's say hi back from the local host!
-<br>
+El workflow `.github/workflows/docker-image.yml` se dispara:
 
-![Image of the app from local-host](Screenshots/4.png)
+* **En cada push o PR** contra `main`.
+* **Manualmente** desde la UI (botón “Run workflow”).
 
-## Features
-- Add new tasks.
-- Mark task as finished/unfinished.
-- Delete a task.
-<br>
+Jobs:
 
-![add tasks](Screenshots/5.png)
-![mark as finished](Screenshots/6.png)
-![delete tasks](Screenshots/7.png)
+1. **build**:
+   * `checkout` → `setup-python` → `pip install` → `flake8` → `docker build`.
+
+2. **deploy** (needs: build):
+   * `checkout` → instala `docker-compose` & `ansible` → `ansible-playbook`.
+
+De este modo tu app se construye y despliega **automáticamente** en local o (con ajustes) en un servidor remoto.
+
+---
+
+## 💾 Persistencia de datos
+
+- **Grafana**: volumen Docker `grafana_data` en `/var/lib/grafana` para mantener dashboards y configuraciones.
+- **SQLite** (Flask): carpeta `./db` montada en `/app/db` dentro del contenedor.
+
+---
+
+## 🚧 Buenas prácticas / siguientes pasos
+
+- **Versiona tus dashboards** bajo `provisioning/dashboards/` para importarlos automáticamente.
+- **Define alertas** en Prometheus (`alert.rules.yml`) y configúralas en Grafana o Alertmanager.
+- **Modulariza Ansible** en roles (`roles/app`, `roles/monitoring`, …).
+- **Entornos separados**: crea inventarios `staging` y `production`.
+- **Tests de integración**: añade un job de pruebas dentro del contenedor Docker (pytest).
+
+---
+
+## 🏷️ Licencia
+
+*Proyecto libre de derechos* – úsalo, adáptalo y mejóralo sin restricciones.
+
+---
+
+¡Gracias por usar este proyecto! Cualquier duda o mejora, abre un *issue* o *pull request* en GitHub. 🎉
