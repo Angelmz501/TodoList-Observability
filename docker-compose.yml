@@ -39,3 +39,9 @@ services:
       - "3000:3000"
     depends_on:
       - prometheus
+    volumes:
+      - grafana_data:/var/lib/grafana   # <— aquí guardamos la base de datos de Grafana
+
+# Definición de volúmenes persistentes
+volumes:
+  grafana_data:

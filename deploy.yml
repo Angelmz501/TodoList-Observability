@@ -10,11 +10,22 @@
         cmd: docker-compose up -d --build
         chdir: "{{ playbook_dir }}"
 
+    - name: Wait for Flask port to be open
+      wait_for:
+        host: localhost
+        port: 80
+        delay: 3     # espera inicial antes de empezar a checkear
+        timeout: 60  # tiempo máximo total en segundos
+
     - name: Wait for the Flask app to be up
       uri:
         url: http://localhost/
         status_code: 200
-        timeout: 30
+        timeout: 5
+      register: result
+      until: result.status == 200
+      retries: 12   # hasta 12 intentos
+      delay: 5      # 5 s entre cada intento
 
     - name: Confirm Prometheus is scraping
       uri:
