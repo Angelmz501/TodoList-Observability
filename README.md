@@ -136,20 +136,6 @@ De este modo tu app se construye y despliega **automáticamente** en local o (co
 
 ---
 
-## 🚧 Buenas prácticas / siguientes pasos
 
-- **Versiona tus dashboards** bajo `provisioning/dashboards/` para importarlos automáticamente.
-- **Define alertas** en Prometheus (`alert.rules.yml`) y configúralas en Grafana o Alertmanager.
-- **Modulariza Ansible** en roles (`roles/app`, `roles/monitoring`, …).
-- **Entornos separados**: crea inventarios `staging` y `production`.
-- **Tests de integración**: añade un job de pruebas dentro del contenedor Docker (pytest).
 
----
-
-## 🏷️ Licencia
-
-*Proyecto libre de derechos* – úsalo, adáptalo y mejóralo sin restricciones.
-
----
-
-¡Gracias por usar este proyecto! Cualquier duda o mejora, abre un *issue* o *pull request* en GitHub. 🎉
+¡Gracias por usar este proyecto!
